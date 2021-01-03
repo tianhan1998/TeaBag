@@ -15,6 +15,8 @@ public interface OsuServiceApi {
 
     boolean bindUser(Long qq,String userName) throws UserAlreadyBindException, UserNotFoundException, IOException, URISyntaxException;
 
+    boolean unBind(Long qq) throws UserNotFoundException;
+
     Long getUserUidByUserName(String userName) throws UserNotFoundException, IOException, URISyntaxException;
 
     Message pr(User user, Contact group) throws URISyntaxException, ConvertJsonErrorException;

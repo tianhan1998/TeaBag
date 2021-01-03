@@ -43,11 +43,26 @@ public class OsuServiceApiImpl implements OsuServiceApi {
             throw new UserAlreadyBindException("此qq号已绑定账号，有问题请联系X bol");
         }else{
             Long uid= getUserUidByUserName(userName);
+            User user2 = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUid, uid));
+            if(user2!=null){
+                throw new UserAlreadyBindException("用户"+userName+"已绑定账号，有问题请联系X bol");
+            }
             return userMapper.insert(new User() {{
                 this.setUid(uid);
                 this.setQq(qq);
                 this.setUserName(userName);
             }}) > 0;
+        }
+    }
+
+    @Override
+    public boolean unBind(Long qq) throws UserNotFoundException {
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getQq, qq));
+        if(user!=null){
+            userMapper.deleteById(user.getId());
+            return true;
+        }else{
+            throw new UserNotFoundException("未在数据库中找到"+qq+"绑定的用户");
         }
     }
 

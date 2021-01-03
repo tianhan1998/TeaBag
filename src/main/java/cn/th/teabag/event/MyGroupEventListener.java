@@ -62,14 +62,23 @@ public class MyGroupEventListener extends SimpleListenerHost {
                     order=plainText;
                     args=null;
                 }
-
+                order=order.toLowerCase();
                 try {
                     if (order.startsWith("!bind")) {
                         if (osuServiceApi.bindUser(senderId, args)) {
                             messageEvent.getSubject().sendMessage("绑定此账号到" + args + "成功!");
                         }
                     }
-                    else if(order.startsWith("!adminBind")){
+                    else if(order.startsWith("!adminunbind")){
+                        if(senderId!=892265525L){
+                            throw new PermissionErrorException("您没有权限哦~");
+                        }else {
+                            if(osuServiceApi.unBind(senderId)){
+                                messageEvent.getSubject().sendMessage("解绑成功");
+                            }
+                        }
+                    }
+                    else if(order.startsWith("!adminbind")){
                         if(senderId!=892265525L){
                             throw new PermissionErrorException("您没有权限哦~");
                         }else{
