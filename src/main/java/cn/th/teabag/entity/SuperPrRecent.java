@@ -19,4 +19,5 @@ public class SuperPrRecent {
     private BeatMapInfo beatMapInfo;
     private BeatMapSetsInfo beatMapSetsInfo;
     private User user;
+    private Long modsId;
 }

@@ -82,7 +82,7 @@ public class OsuServiceApiImpl implements OsuServiceApi {
             messageChainBuilder.add("用户"+user.getUserName()+"没有最近游玩记录");
         }else {
             SuperPrRecent prRecent = ConvertUtils.convertJsonToRecnetOrPr(prOrRecentJson.get(0));
-            BeatMapPP beatMapPP = ConvertUtils.convertJsonToBeatMapPP(HttpUtils.getPPJson(prRecent.getBeatMapInfo().getBeatMapId(), prRecent.getAcc()));
+            BeatMapPP beatMapPP = ConvertUtils.convertJsonToBeatMapPP(HttpUtils.getPPJson(prRecent.getBeatMapInfo().getBeatMapId(), prRecent.getAcc(),prRecent.getModsId()));
             File coverFile=new File(ResourceUtils.CLASSPATH_URL_PREFIX+"beatmapsCover"+prRecent.getBeatMapSetsInfo().getId()+".jpg");
             if(!coverFile.exists()) {
                 coverFile = HttpUtils.downloadCover(prRecent.getBeatMapSetsInfo().getCover(), prRecent.getBeatMapSetsInfo().getId());
@@ -102,7 +102,9 @@ public class OsuServiceApiImpl implements OsuServiceApi {
             result.append("Acc:").append(String.format("%.2f",prRecent.getAcc()*100)).append(" Rank: ").append(prRecent.getRank()).append("\n");
             result.append(prRecent.getMaxCombo()).append("/").append(prRecent.getBeatMapInfo().getCombo()).append(" PP:").append(prRecent.getPp()).append("\n");
             result.append("if fc PP: ").append(beatMapPP.getPP_IF_FC()).append("\n");
-            result.append("95%:").append(beatMapPP.getPP_95()).append(" 97%:").append(beatMapPP.getPP_97()).append(" 98%:").append(beatMapPP.getPP_98()).append(" 99%:").append(beatMapPP.getPP_99()).append(" SS:").append(beatMapPP.getPP_100()).append("\n");
+            result.append("95%:").append(beatMapPP.getPP_95()).append("\t97%:").append(beatMapPP.getPP_97()).append("\n");
+            result.append("98%:").append(beatMapPP.getPP_98()).append("\t99%:").append(beatMapPP.getPP_99()).append("\n");
+            result.append("SS:").append(beatMapPP.getPP_100()).append("\n");
             result.append("Played at: ").append(prRecent.getCreateAt()).append("\n");
             result.append("By ").append(prRecent.getUser().getUserName());
             messageChainBuilder.add(result.toString());

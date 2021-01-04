@@ -113,9 +113,13 @@ public class HttpUtils {
         return null;
     }
 
-    public static JsonNode getPPJson(Long bid,Double acc) throws URISyntaxException {
+    public static JsonNode getPPJson(Long bid,Double acc,Long modId) throws URISyntaxException {
         HttpGet get;
         List<NameValuePair> accList=new ArrayList<NameValuePair>(){{
+            //查询mods
+            if(modId!=null){
+                this.add(new BasicNameValuePair("mods",modId.toString()));
+            }
             this.add(new BasicNameValuePair("beatmapid",bid.toString()));
             this.add(new BasicNameValuePair("wait","1000"));
             this.add(new BasicNameValuePair("k",PP_API_KEY));

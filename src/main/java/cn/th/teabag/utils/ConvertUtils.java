@@ -1,5 +1,6 @@
 package cn.th.teabag.utils;
 
+import cn.th.teabag.context.Mods;
 import cn.th.teabag.entity.*;
 import cn.th.teabag.exception.ConvertArgsErrorException;
 import cn.th.teabag.exception.ConvertJsonErrorException;
@@ -46,18 +47,46 @@ public class ConvertUtils {
         }
     }
 
+    private static Long convertModStringToId(String mod){
+        switch (mod){
+            case "NM":return Mods.NM.getId();
+            case "NF":return Mods.NF.getId();
+            case "EZ":return Mods.EZ.getId();
+            case "TD":return Mods.TD.getId();
+            case "HD":return Mods.HD.getId();
+            case "HR":return Mods.HR.getId();
+            case "SD":return Mods.SD.getId();
+            case "DT":return Mods.DT.getId();
+            case "RX":return Mods.RX.getId();
+            case "HT":return Mods.HT.getId();
+            case "NC":return Mods.NC.getId();
+            case "FL":return Mods.FL.getId();
+            case "AT":return Mods.AUTO.getId();
+            case "SO":return Mods.SO.getId();
+            case "AP":return Mods.AP.getId();
+            case "PF":return Mods.PF.getId();
+            default:return 0L;
+        }
+    }
+
     public static SuperPrRecent convertJsonToRecnetOrPr(JsonNode jsonNode) throws ConvertJsonErrorException {
         SuperPrRecent superPrRecent=new SuperPrRecent();
         try {
             JsonNode mods=jsonNode.get("mods");
             if(mods.size()!=0){
                 StringBuilder modString=new StringBuilder();
+                superPrRecent.setModsId(0L);
                 for (JsonNode mode : mods) {
-                    modString.append(mode.toString());
+                    //去除api中带的引号
+                    String pureMod=mode.toString().replaceAll("\"","");
+                    modString.append(pureMod).append(" ");
+                    //做加法
+                    superPrRecent.setModsId(superPrRecent.getModsId()+convertModStringToId(mode.toString().replaceAll("\"","")));
                 }
                 superPrRecent.setMods(modString.toString());
             }else{
                 superPrRecent.setMods("NM");
+                superPrRecent.setModsId(null);
             }
             superPrRecent.setAcc(jsonNode.get("accuracy").asDouble());
             superPrRecent.setMaxCombo(jsonNode.get("max_combo").asInt());
