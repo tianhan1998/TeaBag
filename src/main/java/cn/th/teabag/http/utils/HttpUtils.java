@@ -97,7 +97,7 @@ public class HttpUtils {
         return download(url,COVER_FILE_URL,beatMapSetsId+".jpg");
     }
 
-    public static String getBeatmapInfoUrl(Long bid){
+    private static String getBeatmapInfoUrl(Long bid){
         return BEATMAP_INFO_URL +bid;
     }
     public static Long getBeatMapCombo(Long bid) throws URISyntaxException {
@@ -112,6 +112,18 @@ public class HttpUtils {
         }
         return null;
     }
+    public static JsonNode getBeatMapInfo(Long bid) throws URISyntaxException {
+        HttpGet get=getHttpGet(new URIBuilder(getBeatmapInfoUrl(bid)));
+        try{
+            CloseableHttpResponse execute = client.execute(get);
+            HttpEntity entity = execute.getEntity();
+            String json = EntityUtils.toString(entity, ENCODE);
+            return objectMapper.readTree(json);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     public static JsonNode getPPJson(Long bid,Double acc,Long modId) throws URISyntaxException {
         HttpGet get;
@@ -119,6 +131,10 @@ public class HttpUtils {
             //查询mods
             if(modId!=null){
                 this.add(new BasicNameValuePair("mods",modId.toString()));
+            }
+            //查询If fc
+            if(acc!=null) {
+                this.add(new BasicNameValuePair("acc", acc.toString()));
             }
             this.add(new BasicNameValuePair("beatmapid",bid.toString()));
             this.add(new BasicNameValuePair("wait","1000"));
@@ -128,7 +144,6 @@ public class HttpUtils {
             this.add(new BasicNameValuePair("acc","0.98"));
             this.add(new BasicNameValuePair("acc","0.99"));
             this.add(new BasicNameValuePair("acc","1"));
-            this.add(new BasicNameValuePair("acc",acc.toString()));
         }};
         get = getHttpGet(new URIBuilder(PP_API_URL),accList);
         if(get!=null) {

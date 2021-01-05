@@ -2,6 +2,7 @@ package cn.th.teabag.service;
 
 import cn.th.teabag.entity.User;
 import cn.th.teabag.exception.ConvertJsonErrorException;
+import cn.th.teabag.exception.NetErrorException;
 import cn.th.teabag.exception.UserAlreadyBindException;
 import cn.th.teabag.exception.UserNotFoundException;
 import net.mamoe.mirai.contact.Contact;
@@ -19,9 +20,11 @@ public interface OsuServiceApi {
 
     Long getUserUidByUserName(String userName) throws UserNotFoundException, IOException, URISyntaxException;
 
-    Message pr(User user, Contact group) throws URISyntaxException, ConvertJsonErrorException;
+    Message pr(User user, Contact group) throws URISyntaxException, ConvertJsonErrorException, NetErrorException;
 
-    Message recent(User user, Contact group) throws URISyntaxException, ConvertJsonErrorException;
+    Message recent(User user, Contact group) throws URISyntaxException, ConvertJsonErrorException, NetErrorException;
+
+    Message ppMapInfo(Long bid,String mods,Contact group) throws URISyntaxException, IOException, NetErrorException, ConvertJsonErrorException;
 
     File getBg(Long bid);
 }

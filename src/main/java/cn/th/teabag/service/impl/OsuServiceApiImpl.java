@@ -1,10 +1,8 @@
 package cn.th.teabag.service.impl;
 
-import cn.th.teabag.entity.BeatMapPP;
-import cn.th.teabag.entity.Mapbg;
-import cn.th.teabag.entity.SuperPrRecent;
-import cn.th.teabag.entity.User;
+import cn.th.teabag.entity.*;
 import cn.th.teabag.exception.ConvertJsonErrorException;
+import cn.th.teabag.exception.NetErrorException;
 import cn.th.teabag.exception.UserAlreadyBindException;
 import cn.th.teabag.exception.UserNotFoundException;
 import cn.th.teabag.http.utils.HttpUtils;
@@ -19,6 +17,7 @@ import net.mamoe.mirai.message.data.Image;
 import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 import net.mamoe.mirai.utils.ExternalResource;
+import org.junit.platform.commons.util.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
@@ -83,10 +82,7 @@ public class OsuServiceApiImpl implements OsuServiceApi {
         }else {
             SuperPrRecent prRecent = ConvertUtils.convertJsonToRecnetOrPr(prOrRecentJson.get(0));
             BeatMapPP beatMapPP = ConvertUtils.convertJsonToBeatMapPP(HttpUtils.getPPJson(prRecent.getBeatMapInfo().getBeatMapId(), prRecent.getAcc(),prRecent.getModsId()));
-            File coverFile=new File(ResourceUtils.CLASSPATH_URL_PREFIX+"beatmapsCover"+prRecent.getBeatMapSetsInfo().getId()+".jpg");
-            if(!coverFile.exists()) {
-                coverFile = HttpUtils.downloadCover(prRecent.getBeatMapSetsInfo().getCover(), prRecent.getBeatMapSetsInfo().getId());
-            }
+            File coverFile=getCoverFile(prRecent.getBeatMapSetsInfo().getId(),prRecent.getBeatMapSetsInfo().getCover());
             if(coverFile!=null){
                 Image uploadImage =group.uploadImage(ExternalResource.create(coverFile));
                 messageChainBuilder.add(uploadImage);
@@ -106,22 +102,97 @@ public class OsuServiceApiImpl implements OsuServiceApi {
             result.append("98%:").append(beatMapPP.getPP_98()).append("\t99%:").append(beatMapPP.getPP_99()).append("\n");
             result.append("SS:").append(beatMapPP.getPP_100()).append("\n");
             result.append("Played at: ").append(prRecent.getCreateAt()).append("\n");
-            result.append("By ").append(prRecent.getUser().getUserName());
+            result.append("By ").append(prRecent.getUser().getUserName()).append("\n");
+            result.append("https://osu.ppy.sh/b/").append(prRecent.getBeatMapInfo().getBeatMapId());
             messageChainBuilder.add(result.toString());
         }
         return messageChainBuilder.build();
     }
 
     @Override
-    public Message pr(User user, Contact group) throws URISyntaxException, ConvertJsonErrorException {
+    public Message pr(User user, Contact group) throws URISyntaxException, ConvertJsonErrorException, NetErrorException {
         JsonNode prJson=HttpUtils.getPrJson(user.getUid());
-        return printPrOrRecent(prJson,user,group);
+        if(prJson!=null) {
+            return printPrOrRecent(prJson, user, group);
+        }else{
+            throw new NetErrorException("网络出现问题，请稍后再试");
+        }
     }
 
     @Override
-    public Message recent(User user,Contact group) throws URISyntaxException, ConvertJsonErrorException {
+    public Message recent(User user,Contact group) throws URISyntaxException, ConvertJsonErrorException, NetErrorException {
         JsonNode recentJson=HttpUtils.getRecentJson(user.getUid());
-        return printPrOrRecent(recentJson,user,group);
+        if(recentJson!=null) {
+            return printPrOrRecent(recentJson, user, group);
+        }else{
+            throw new NetErrorException("网络出现问题，请稍后再试");
+        }
+    }
+
+    @Override
+    public Message ppMapInfo(Long bid, String mods,Contact group) throws URISyntaxException, IOException, NetErrorException, ConvertJsonErrorException {
+        JsonNode mapJson=HttpUtils.getBeatMapInfo(bid);
+        MessageChainBuilder messageChainBuilder=new MessageChainBuilder();
+        StringBuilder formatModsString=new StringBuilder();
+        if(mapJson!=null) {
+            BeatMapInfo beatMapInfo = ConvertUtils.convertJsonToBeatMapInfo(mapJson);
+            BeatMapSetsInfo beatMapSetsInfo = ConvertUtils.convertJsonToBeatMapSetsInfo(mapJson.get("beatmapset"));
+            //分析Mod
+            Long modsId = null;
+            if(StringUtils.isNotBlank(mods)) {
+                StringBuilder mod = new StringBuilder();
+                modsId=0L;
+                for (Character c : mods.toCharArray()) {
+                    if (Character.isAlphabetic(c)) {
+                        mod.append(c);
+                        if (mod.length() == 2) {
+                            Long tempId=ConvertUtils.convertModStringToId(mod.toString());
+                            modsId +=tempId;
+                            //判断无效mod
+                            if(tempId!=0) {
+                                formatModsString.append(mod).append(" ");
+                            }
+                            mod = new StringBuilder();
+                        }
+                    }
+                }
+            }else{
+                formatModsString.append("NM");
+            }
+            JsonNode beatMapPP=HttpUtils.getPPJson(bid,null,modsId);
+            BeatMapPP pp=ConvertUtils.convertJsonToBeatMapPP(beatMapPP);
+            File coverFile=getCoverFile(beatMapSetsInfo.getId(), beatMapSetsInfo.getCover());
+            if(coverFile!=null){
+                try {
+                    Image uploadImage = group.uploadImage(ExternalResource.create(coverFile));
+                    messageChainBuilder.add(uploadImage);
+                }catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            StringBuilder result = new StringBuilder();
+            result.append(beatMapSetsInfo.getArtist()).append(" - ").append(beatMapSetsInfo.getTitle()).append(" [").append(beatMapInfo.getVersion()).append("] ").append(" ").append(formatModsString).append("\n");
+            result.append("Star:").append(beatMapInfo.getDifficultyStar()).append("☆").append(" BPM:").append(beatMapInfo.getBpm()).append("\n");
+            result.append("AR:").append(beatMapInfo.getAr()).append(" OD:").append(beatMapInfo.getOd()).append(" CS:").append(beatMapInfo.getCs()).append(" HP:").append(beatMapInfo.getHp()).append("\n");
+            result.append("95%:").append(pp.getPP_95()).append("\n");
+            result.append("97%:").append(pp.getPP_97()).append("\n");
+            result.append("98%:").append(pp.getPP_98()).append("\n");
+            result.append("99%:").append(pp.getPP_99()).append("\n");
+            result.append("SS:").append(pp.getPP_100()).append("\n");
+            result.append("https://osu.ppy.sh/b/").append(bid);
+            messageChainBuilder.add(String.valueOf(result));
+            return messageChainBuilder.build();
+        }else{
+            throw new NetErrorException("网络出现问题，请稍后再试");
+        }
+    }
+
+    private File getCoverFile(Long mapSetsId,String coverUrl){
+        File coverFile=new File(ResourceUtils.CLASSPATH_URL_PREFIX+"beatmapsCover"+mapSetsId+".jpg");
+        if(!coverFile.exists()) {
+            coverFile = HttpUtils.downloadCover(coverUrl, mapSetsId);
+        }
+        return coverFile;
     }
 
     @Override

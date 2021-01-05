@@ -27,6 +27,23 @@ public class ConvertUtils {
         }
     }
 
+    public static String[] splitPPArgs(String args) throws ConvertArgsErrorException {
+        String[] result=new String[2];
+        args=args.toUpperCase();
+        if(args.contains("WITH")){
+            result[0]=args.substring(0,args.indexOf("WITH")).trim();
+            result[1]=args.substring(args.indexOf("WITH")+4).trim();
+        }else{
+            try {
+                Long.valueOf(args.trim());
+            }catch (Exception e){
+                throw new ConvertArgsErrorException("参数转换错误，请输入正确的参数 例:!pp xxxxxx with HDHR");
+            }
+            result[0]=args;
+        }
+        return result;
+    }
+
     public static BeatMapPP convertJsonToBeatMapPP(JsonNode jsonNode) throws ConvertJsonErrorException {
         BeatMapPP beatMapPP=new BeatMapPP();
         try{
@@ -47,7 +64,7 @@ public class ConvertUtils {
         }
     }
 
-    private static Long convertModStringToId(String mod){
+    public static Long convertModStringToId(String mod){
         switch (mod){
             case "NM":return Mods.NM.getId();
             case "NF":return Mods.NF.getId();

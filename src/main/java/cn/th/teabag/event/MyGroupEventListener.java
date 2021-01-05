@@ -1,6 +1,7 @@
 package cn.th.teabag.event;
 
 import cn.th.teabag.entity.User;
+import cn.th.teabag.exception.ArgsErrorException;
 import cn.th.teabag.exception.PermissionErrorException;
 import cn.th.teabag.mapper.UserMapper;
 import cn.th.teabag.service.impl.OsuServiceApiImpl;
@@ -87,6 +88,12 @@ public class MyGroupEventListener extends SimpleListenerHost {
                                 messageEvent.getSubject().sendMessage("绑定"+twoArgs[0]+"账号到"+twoArgs[1]+"成功");
                             }
                         }
+                    }else if(order.startsWith("!pp")){
+                        if(args==null){
+                            throw new ArgsErrorException("参数有误，需要bid 例:!pp xxxxxx");
+                        }
+                        String[] ppArgs=ConvertUtils.splitPPArgs(args);
+                        messageEvent.getSubject().sendMessage(osuServiceApi.ppMapInfo(Long.valueOf(ppArgs[0]),ppArgs[1],group));
                     }
                     else if(order.startsWith("!pr")){
                         if(args==null) {
