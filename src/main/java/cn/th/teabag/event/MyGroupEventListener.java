@@ -74,7 +74,10 @@ public class MyGroupEventListener extends SimpleListenerHost {
                         if(senderId!=892265525L){
                             throw new PermissionErrorException("您没有权限哦~");
                         }else {
-                            if(osuServiceApi.unBind(senderId)){
+                            if(args==null){
+                                throw new ArgsErrorException("参数有误~解绑指令例如:!adminUnBind <qq>");
+                            }
+                            if(osuServiceApi.unBind(Long.valueOf(args))){
                                 messageEvent.getSubject().sendMessage("解绑成功");
                             }
                         }
