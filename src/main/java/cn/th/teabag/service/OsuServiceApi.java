@@ -26,5 +26,11 @@ public interface OsuServiceApi {
 
     Message ppMapInfo(Long bid,String mods,Contact group) throws URISyntaxException, IOException, NetErrorException, ConvertJsonErrorException;
 
+    void sendPrToMM(String order,String userName, Contact group);
+
+    void sendRecentToMM(String order,String userName,Contact group);
+
+    void sendPPToMM(String text,Contact group);
+
     File getBg(Long bid);
 }

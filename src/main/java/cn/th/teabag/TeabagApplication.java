@@ -1,8 +1,8 @@
 package cn.th.teabag;
 
 import cn.th.teabag.context.Path;
+import cn.th.teabag.event.MMEventListener;
 import cn.th.teabag.event.MyGroupEventListener;
-import cn.th.teabag.http.utils.HttpUtils;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactory;
 import net.mamoe.mirai.utils.BotConfiguration;
@@ -16,13 +16,16 @@ import java.net.URISyntaxException;
 
 @SpringBootApplication
 @MapperScan("cn.th.teabag.mapper")
+//@EnableScheduling
 public class TeabagApplication {
 
     private static MyGroupEventListener myGroupEventListener;
+    private static MMEventListener mmEventListener;
 
     @Autowired
-    public TeabagApplication(MyGroupEventListener myGroupEventListener){
+    public TeabagApplication(MyGroupEventListener myGroupEventListener, MMEventListener mmEventListener){
         TeabagApplication.myGroupEventListener=myGroupEventListener;
+        TeabagApplication.mmEventListener=mmEventListener;
     }
 
     public static void main(String[] args) throws IOException, URISyntaxException {
@@ -41,6 +44,7 @@ public class TeabagApplication {
 //            fileBasedDeviceInfo();
 //        }});
         bot.getEventChannel().registerListenerHost(myGroupEventListener);
+        bot.getEventChannel().registerListenerHost(mmEventListener);
         bot.login();
         bot.join();
     }

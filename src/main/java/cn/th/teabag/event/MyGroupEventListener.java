@@ -95,21 +95,38 @@ public class MyGroupEventListener extends SimpleListenerHost {
                         if(args==null){
                             throw new ArgsErrorException("参数有误，需要bid 例:!pp xxxxxx");
                         }
-                        String[] ppArgs=ConvertUtils.splitPPArgs(args);
-                        messageEvent.getSubject().sendMessage(osuServiceApi.ppMapInfo(Long.valueOf(ppArgs[0]),ppArgs[1],group));
+//                        String[] ppArgs=ConvertUtils.splitPPArgs(args);
+//                        messageEvent.getSubject().sendMessage(osuServiceApi.ppMapInfo(Long.valueOf(ppArgs[0]),ppArgs[1],group));
+                        osuServiceApi.sendPPToMM(plainText,group);
                     }
                     else if(order.startsWith("!pr")){
                         if(args==null) {
-                            messageEvent.getSubject().sendMessage(osuServiceApi.pr(user,group));
+//                            messageEvent.getSubject().sendMessage(osuServiceApi.pr(user,group));
+                            osuServiceApi.sendPrToMM(order,user.getUserName(),group);
                         }else{
-                            messageEvent.getSubject().sendMessage(osuServiceApi.pr(userServiceApi.getUserByUserName(args),group));
+//                            messageEvent.getSubject().sendMessage(osuServiceApi.pr(userServiceApi.getUserByUserName(args),group));
+                            osuServiceApi.sendPrToMM(order,args,group);
                         }
                     }
                     else if(order.startsWith("!recent")){
                         if(args==null) {
-                            messageEvent.getSubject().sendMessage(osuServiceApi.recent(user,group));
+//                            messageEvent.getSubject().sendMessage(osuServiceApi.recent(user,group));
+                            osuServiceApi.sendRecentToMM(order,user.getUserName(),group);
                         }else{
-                            messageEvent.getSubject().sendMessage(osuServiceApi.recent(userServiceApi.getUserByUserName(args),group));
+//                            messageEvent.getSubject().sendMessage(osuServiceApi.recent(userServiceApi.getUserByUserName(args),group));
+                            osuServiceApi.sendRecentToMM(order,args,group);
+                        }
+                    }else{
+                        if(args==null) {
+                            //无参数冒号命令 如!info:3 自动在冒号前加 username
+                            if(order.contains(":")) {
+                                StringBuilder sb = new StringBuilder(order);
+                                group.getBot().getFriend(834276213L).sendMessage(sb.insert(sb.indexOf(":"), " " + user.getUserName()).toString());
+                            }else {
+                                messageEvent.getBot().getFriend(834276213L).sendMessage(order + " " + user.getUserName());
+                            }
+                        }else{
+                            messageEvent.getBot().getFriend(834276213L).sendMessage(plainText);
                         }
                     }
                 }catch(Exception e){

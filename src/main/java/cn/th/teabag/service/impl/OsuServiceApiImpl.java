@@ -187,6 +187,31 @@ public class OsuServiceApiImpl implements OsuServiceApi {
         }
     }
 
+    @Override
+    public void sendPrToMM(String order,String userName, Contact group) {
+        if(order.contains(":")){
+            StringBuilder sb=new StringBuilder(order);
+            group.getBot().getFriend(834276213L).sendMessage(sb.insert(sb.indexOf(":")," "+userName).toString());
+        }else {
+            group.getBot().getFriend(834276213L).sendMessage(order + " " + userName);
+        }
+    }
+
+    @Override
+    public void sendRecentToMM(String order,String userName, Contact group) {
+        if(order.contains(":")){
+            StringBuilder sb=new StringBuilder(order);
+            group.getBot().getFriend(834276213L).sendMessage(sb.insert(sb.indexOf(":")," "+userName).toString());
+        }else {
+            group.getBot().getFriend(834276213L).sendMessage(order + " " + userName);
+        }
+    }
+
+    @Override
+    public void sendPPToMM(String text, Contact group) {
+        group.getBot().getFriend(834276213L).sendMessage(text);
+    }
+
     private File getCoverFile(Long mapSetsId,String coverUrl){
         File coverFile=new File(ResourceUtils.CLASSPATH_URL_PREFIX+"beatmapsCover"+mapSetsId+".jpg");
         if(!coverFile.exists()) {
